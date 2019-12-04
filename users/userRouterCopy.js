@@ -10,7 +10,7 @@ const router = express.Router();
 
 //CRUD OPS
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
   // do your magic!
    Users.insert(req.body)
       .then(newUser => {
@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
       })
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // do your magic!
   const userId = req.params.id
 
@@ -59,7 +59,7 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
   const userId = req.params.id
 
@@ -78,7 +78,7 @@ router.get('/:id', (req, res) => {
   })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res) => {
   // do your magic!
   const userId = req.params.id
 
@@ -106,7 +106,7 @@ router.get('/:id/posts', (req, res) => {
 
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   // do your magic!
   const userId = req.params.id
 
@@ -132,7 +132,7 @@ router.delete('/:id', (req, res) => {
 });
 
 
-router.put('/:id', (req, res) => { //I can change the users I made but not the seeds SQ Constraints?
+router.put('/:id', validateUserId, (req, res) => { //I can change the users I made but not the seeds SQ Constraints?
   // do your magic!
   const userId = req.params.id
   const newBody = req.body
@@ -206,7 +206,6 @@ function validatePost(req, res, next){
   else{
       next()
   }
- 
 }
 
 module.exports = router;
