@@ -48,8 +48,20 @@ router.delete('/:id', validatePostId, (req, res) => {
   })
 });
 
-router.put('/:id', (req, res) => {
-  // do your magic!
+router.put('/:id', validatePostId, (req, res) => {
+  
+  Posts.update(req.params.id, req.body)
+  .then(count => {
+    if(count > 0){
+      res.status(200).json(`Edited post ${req.params.id}`)
+    }else{
+      res.status(400).json("Something could not update")
+    }
+  })
+  .catch(err => {
+    console.log("This is PUT error for Posts", err)
+    res.status(500).json({error: "Error editing post"})
+  })
 });
 
 
