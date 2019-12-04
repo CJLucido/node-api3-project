@@ -3,6 +3,7 @@ const express = require('express');
 
 //LOCAL FILES
 const Users = require('./userDb')
+const Posts =require('../posts/postDb')
 
 //ESTABLISH ROUTER
 const router = express.Router();
@@ -11,11 +12,39 @@ const router = express.Router();
 
 router.post('/', (req, res) => {
   // do your magic!
-  
+   Users.insert(req.body)
+      .then(newUser => {
+        res.status(200).json(newUser)
+      })
+      .catch(err => {
+        console.log("POST create user error", err)
+        res.status(500).json({error: "Error creating a user, server"})
+      })
 });
 
 router.post('/:id/posts', (req, res) => {
   // do your magic!
+  const userId = req.params.id
+
+  Users.getById(userId)
+  .then(user => {
+    if(!user){
+      res.status(404).json({error: "User not found"})
+    }else{
+      Posts.insert(req.body)
+      .then(newPost => {
+        res.status(200).json(newPost)
+      })
+      .catch(err => {
+        console.log("POST create post error", err)
+        res.status(500).json({error: "Error creating a post, server"})
+      })
+    }
+  })
+  .catch(err => {
+    console.log("POST finding user error", err)
+    res.status(500).json({error: "Error finding user, server"})
+  })
 });
 
 router.get('/', (req, res) => {
@@ -102,8 +131,31 @@ router.delete('/:id', (req, res) => {
   })
 });
 
-router.put('/:id', (req, res) => {
+
+router.put('/:id', (req, res) => { //I can change the users I made but not the seeds SQ Constraints?
   // do your magic!
+  const userId = req.params.id
+  const newBody = req.body
+
+  Users.getById(userId)
+  .then(user => {
+    if(!user){
+      res.status(404).json({error: "User not found"})
+    }else{
+      Users.update(userId, newBody)
+      .then(count => {
+        res.status(200).json({message: `Changes made to ${count} user`})
+      })
+      .catch(err => {
+        console.log("PUT edit user error", err)
+        res.status(500).json({error: "Error editing a user, server"})
+      })
+    }
+  })
+  .catch(err => {
+    console.log("PUT finding user error", err)
+    res.status(500).json({error: "Error finding user, server"})
+  })
 });
 
 
