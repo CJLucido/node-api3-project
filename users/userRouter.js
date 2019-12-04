@@ -1,6 +1,13 @@
+//LIBRARIES
 const express = require('express');
 
+//LOCAL FILES
+const Posts = require('./userDb')
+
+//ESTABLISH ROUTER
 const router = express.Router();
+
+//CRUD OPS
 
 router.post('/', (req, res) => {
   // do your magic!
@@ -30,18 +37,23 @@ router.put('/:id', (req, res) => {
   // do your magic!
 });
 
+
+//MIDDLEWARE
 //custom middleware
 
-function validateUserId(req, res, next) {
-  // do your magic!
+function validateUserId(req, res, next){
+
+  next()
 }
 
-function validateUser(req, res, next) {
-  // do your magic!
+function validateUser(req, res, next){
+
+  next()
 }
 
-function validatePost(req, res, next) {
-  // do your magic!
+function validatePost(req, res, next){
+
+  next()
 }
 
 module.exports = router;
