@@ -10,8 +10,10 @@ const router = express.Router();
 
 //CRUD OPS
 
-router.post('/', (req, res) => {
-  // do your magic!
+let reqUser = {}
+
+router.post('/', validateUser, (req, res) => {
+
    Users.insert(req.body)
       .then(newUser => {
         res.status(200).json(newUser)
@@ -20,17 +22,11 @@ router.post('/', (req, res) => {
         console.log("POST create user error", err)
         res.status(500).json({error: "Error creating a user, server"})
       })
+
 });
 
-router.post('/:id/posts', (req, res) => {
-  // do your magic!
-  const userId = req.params.id
-
-  Users.getById(userId)
-  .then(user => {
-    if(!user){
-      res.status(404).json({error: "User not found"})
-    }else{
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
+ 
       Posts.insert(req.body)
       .then(newPost => {
         res.status(200).json(newPost)
@@ -39,16 +35,11 @@ router.post('/:id/posts', (req, res) => {
         console.log("POST create post error", err)
         res.status(500).json({error: "Error creating a post, server"})
       })
-    }
-  })
-  .catch(err => {
-    console.log("POST finding user error", err)
-    res.status(500).json({error: "Error finding user, server"})
-  })
+
 });
 
 router.get('/', (req, res) => {
-  // do your magic!
+ 
   Users.get()
   .then(users => {
     res.status(200).json(users)
@@ -59,36 +50,15 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
-  // do your magic!
-  const userId = req.params.id
+router.get('/:id', validateUserId, (req, res) => {
 
-  Users.getById(userId)
-  .then(user => {
-    if(!user){
-      res.status(404).json({error: "User does not exist"})
-    }else{
-      res.status(200).json(user)
-    }
-    
-  })
-  .catch(err => {
-    console.log('GET single user err', err)
-    res.status(500).json({error: "Error specific user, server"})
-  })
+      res.status(200).json(reqUser)
+
 });
 
-router.get('/:id/posts', (req, res) => {
-  // do your magic!
-  const userId = req.params.id
+router.get('/:id/posts', validateUserId, (req, res) => {
 
-  Users.getById(userId)
-  .then(user => {
-
-    if(!user){
-      res.status(404).json({error: "User not found"})
-    }else{
-      Users.getUserPosts(userId)
+      Users.getUserPosts(req.params.id)
       .then(posts => {
         res.status(200).json(posts)
       })
@@ -96,26 +66,13 @@ router.get('/:id/posts', (req, res) => {
         console.log('GET user posts err', err)
         res.status(500).json({error: "Error retrieving posts, server"})
       })
-    }
-    
-  })
-  .catch(err => {
-    console.log('GET single user err', err)
-    res.status(500).json({error: "Error specific user, server"})
-  })
+
 
 });
 
-router.delete('/:id', (req, res) => {
-  // do your magic!
-  const userId = req.params.id
+router.delete('/:id', validateUserId, (req, res) => {
 
-  Users.getById(userId)
-  .then(user => {
-    if(!user){
-      res.status(404).json({error: "User not found"})
-    }else{
-      Users.remove(userId)
+      Users.remove(req.params.id)
       .then(countOfRemoved => {
         res.status(200).json(`Number of records removed ${countOfRemoved}`)
       })
@@ -123,26 +80,13 @@ router.delete('/:id', (req, res) => {
         console.log("DEL user error on remove function", err)
         res.status(500).json({error: "Error attempting to remove"})
       })
-    }
-  })
-  .catch(err => {
-    console.log("DEL user error on user ids", err)
-    res.status(500).json({error: "Error attempting to find user on DEL"})
-  })
+
 });
 
 
-router.put('/:id', (req, res) => { //I can change the users I made but not the seeds SQ Constraints?
-  // do your magic!
-  const userId = req.params.id
-  const newBody = req.body
+router.put('/:id', validateUserId, (req, res) => { //I can change the users I made but not the seeds SQ Constraints?
 
-  Users.getById(userId)
-  .then(user => {
-    if(!user){
-      res.status(404).json({error: "User not found"})
-    }else{
-      Users.update(userId, newBody)
+      Users.update(req.params.id, req.body)
       .then(count => {
         res.status(200).json({message: `Changes made to ${count} user`})
       })
@@ -150,12 +94,7 @@ router.put('/:id', (req, res) => { //I can change the users I made but not the s
         console.log("PUT edit user error", err)
         res.status(500).json({error: "Error editing a user, server"})
       })
-    }
-  })
-  .catch(err => {
-    console.log("PUT finding user error", err)
-    res.status(500).json({error: "Error finding user, server"})
-  })
+
 });
 
 
@@ -169,7 +108,7 @@ function validateUserId(req, res, next){
     if(!user){
       res.status(404).json({error: "invalid user id"})
     }else{
-     let reqUser = user
+      reqUser = user
      next()
     }
   })
@@ -182,7 +121,7 @@ function validateUserId(req, res, next){
 function validateUser(req, res, next){
   const userBody = req.body
 
-  if(!userBody){
+  if(!userBody){//there is always a body being sent by postman even if I click none
     res.status(400).json({error: "missing user data"})
   }
   else if(!userBody.name){
@@ -200,13 +139,12 @@ function validatePost(req, res, next){
   if(!postBody){
     res.status(400).json({error: "missing post data"})
   }
-  else if(!postBody.name){
+  else if(!postBody.text){
     res.status(400).json({error: "missing required text field"})
   } 
   else{
       next()
   }
- 
 }
 
 module.exports = router;
